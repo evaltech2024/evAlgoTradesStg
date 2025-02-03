@@ -19,9 +19,6 @@ import { home, person, settings,  ellipsisHorizontal, ellipsisVertical, personCi
 import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebaseConfig';
-// import config from './firebaseConfig';
-// import LoginPage from './LoginPage';
-// import HomePage from './HomePage';
 import HomePage from './pages/HomePage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
@@ -29,10 +26,6 @@ import Header from './components/HeaderPage.jsx';
 import Layout from './components/Layout.jsx';
 import EditProfilePage from './components/Profile/EditProfilePage.jsx';
 import VerifyProfilePage from './components/Profile/VerifyProfilePage.jsx';
-// import Tab1 from './pages/Tab1';
-// import Tab2 from './pages/Tab2';
-// import Tab3 from './pages/Tab3';
-
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -65,16 +58,10 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const App = () => {  
-  // const [user, loading] = useAuthState(auth);
-  // console.log(user);
-  // if (loading) {
-  //   return <div>Loading...</div>;
-  // }
+const App = () => {
   return (
     <IonApp>
     <IonReactRouter>
-      {/* <Layout> */}
         <IonRouterOutlet>
           <Route exact path="/home" render={() => <HomePage />} />
           <Route exact path="/profile" render={() => <ProfilePage />} />
@@ -85,7 +72,6 @@ const App = () => {
             <Redirect to="/home" />
           </Route>
         </IonRouterOutlet>
-      {/* </Layout> */}
     </IonReactRouter>
   </IonApp>
   )

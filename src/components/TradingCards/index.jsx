@@ -32,6 +32,8 @@ const StockCard = ({ StockData }) => {
   const OpenPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.o;
   const DailyBarValue=(((currentPrice - OpenPrice)/currentPrice) * 100).toFixed(2);
   const isPositive = DailyBarValue >= 0;
+  const NoOfTrades=StockData.stockHistory.length;
+  const TodayGain = (StockData.stockHistory.reduce((acc, trade) => acc + Number(trade.gain), 0) / NoOfTrades).toFixed(2);
   
   const PreCurrentPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].prevDailyBar.c;
   const PrevOpenPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].prevDailyBar.o;
@@ -80,79 +82,84 @@ const StockCard = ({ StockData }) => {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    console.log("Signing in with Google");
+    await signInWithGoogle().then(() => {
+      console.log("User signed in with Google");
+      history.push('/verify-profile');
+      setShowActionSheet(false);
+    });
+  };
+
   return (
     <IonCard className="stock-card">
       <IonCardContent>
         <div className="evaigo-overall">
-          <IonProgressBar style={{'marginRight': '10px'}}
-          value={StockData.activeTrade.strength / 100}
-          color="primary"
-        ></IonProgressBar>
+          <IonText color="dark">
+              <h4 style={{ fontSize: '16px', fontWeight: '700' }}>{StockData.activeTrade.symbol}</h4>
+              </IonText>
           <IonIcon icon={statsChartOutline} color="success" />
         </div>
+        <div className="stock-details">
+          <IonText color="dark" style={{ fontSize: '14px', fontWeight: '700', color: '#002d62' }}>
+            $ {StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.c}
+          </IonText>
+          <IonChip color={isPositive ? "primary" : "danger"} className="stock-details" style={{ fontSize: '12px' }}>
+            <IonIcon icon={isPositive ? trendingUp : trendingDown} />
+            {DailyBarValue} %
+          </IonChip>
+        </div>
         <div className="stock-info">
+          <IonProgressBar style={{ 'marginRight': '10px' }} value={StockData.activeTrade.strength / 100} color="primary" ></IonProgressBar>
+          <div color="dark" className="stock-details">
+            <IonText className="stock-details-header"># of Trades:</IonText>
+            <IonText className="stock-details-value">{NoOfTrades}</IonText>
+          </div>
           <div className="stock-details">
-            <IonText color="dark">
-              <h4 style={{fontSize:'20px', fontWeight:'700'}}>{StockData.activeTrade.symbol}</h4>
-              <h3>${StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.c}</h3>
-              
-            </IonText>
-            <IonText color={isPositive ? "success" : "danger"}>
-              <p>
-                <IonIcon icon={isPositive ? trendingUp : trendingDown} />
-                {` ${DailyBarValue} %`}
-              </p>
-            </IonText>
-            <IonText color="medium">
-              <p  style={{ fontSize: 'xx-small'}}>Last Day  
-                <IonText color={PrevisPositive ? "success" : "danger"}>
-                    <IonIcon icon={PrevisPositive ? trendingUp : trendingDown} />
-                    {` ${PrevDailyBarValue} %`}
-              </IonText></p>
+            <IonText className="stock-details-header">Gain:</IonText>
+            <IonText className="stock-details-value">{TodayGain === 'NaN'?0:TodayGain } %</IonText>
+          </div>
+          {console.log(StockData.stockHistory)}
+          <IonText className="stock-details-note">Last <span className="stock-details-note-highlight">{StockData.activeTrade.method}</span> Trade Signal at <span className="stock-details-note-highlight">{StockData.stockHistory[0]?.end}</span> </IonText> 
+        </div>
+        <div className="card-footer">
+          <div color="medium" className="last-day">
+            <IonText style={{ fontSize: '8px' }}>Last Day</IonText>
+            <IonText color={PrevisPositive ? "primary" : "danger"} className="last-day-value">
+              <IonIcon icon={PrevisPositive ? trendingUp : trendingDown} />
+              {` ${PrevDailyBarValue} %`}
             </IonText>
           </div>
-          <div className="stock-price">
-            <IonText color="dark">
-              <p># of Trades: 0</p>
-              <p>Gain: 400 %</p>
-              <p></p>
-            </IonText>
+          <div className="stock-actions">
+            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Buy")} size="small" disabled={StockData.activeTrade.method === 'sell'}>
+              Buy
+            </IonButton>
+            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Sell")} size="small" disabled={StockData.activeTrade.method === 'buy'}>
+              Sell
+            </IonButton>
           </div>
         </div>
-        <div className="stock-actions">
-          <IonButton expand="block" fill={StockData.activeTrade.method === 'buy'?'solid':'outline'} onClick={() => handleAction("Buy")} color="primary" className="" size="small" disabled={StockData.activeTrade.method === 'sell'}>
-            {/* <IonIcon icon={arrowDown} slot="start" /> */}
-            Buy
-          </IonButton>
-          <IonButton fill={StockData.activeTrade.method === 'sell'?'solid':'outline'} onClick={() => handleAction("Sell")} color="primary" className="" size="small" disabled={StockData.activeTrade.method === 'buy'}>
-            {/* <IonIcon icon={arrowUp} slot="start" /> */}
-            Sell
-          </IonButton>
-        </div>
+        
         <IonActionSheet
-        isOpen={showActionSheet}
-        onDidDismiss={() => setShowActionSheet(false)}
-        header={`${actionType.charAt(0).toUpperCase() + actionType.slice(1)} ${StockData.activeTrade.symbol}`}
-        buttons={[
-          {
-            text: 'Sign in with Google',
-            icon: logoGoogle,
-            handler: async() => {
-              await signInWithGoogle();
-              // history.push('/verify-profile');
-              setShowActionSheet(false);
+          isOpen={showActionSheet}
+          onDidDismiss={() => setShowActionSheet(false)}
+          header={`${actionType.charAt(0).toUpperCase() + actionType.slice(1)} ${StockData.activeTrade.symbol}`}
+          buttons={[
+            {
+              text: 'Sign in with Google',
+              icon: logoGoogle,
+              handler: handleGoogleSignIn
+            },
+            {
+              text: 'Cancel',
+              role: 'cancel',
             }
-          },
-          {
-            text: 'Cancel',
-            role: 'cancel',
-          }
-        ]}
-      >
-        <IonContent>
-          <LoginPage />
-        </IonContent>
-      </IonActionSheet>
+          ]}
+        >
+          <IonContent>
+            <LoginPage />
+          </IonContent>
+        </IonActionSheet>
       </IonCardContent>
     </IonCard>
   );

@@ -1,4 +1,4 @@
-.app-container {
+/* .app-container {
     padding: 20px;
     background-color: #f4f4f4;
     height: 100%;
@@ -101,8 +101,8 @@
         align-content: space-between;
         align-items: center;
         flex-wrap: nowrap;
-  }
-  .balance-card {
+  } */
+  /* .balance-card {
     background-color: #1e2f97;
     color: #f0f0f0 !important;
     border-radius: 20px;
@@ -110,4 +110,30 @@
     -moz-border-radius: 20px;
     -ms-border-radius: 20px;
     -o-border-radius: 20px;
+} */
+
+.Today-Stock-info{
+  display: flex;
+  justify-content: space-between;
+  background: #cce4ff;
+  border-radius: 3px;
+  flex-wrap: wrap;
+  padding: 8px;
+}
+.Today-Stock-details{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0px 5px 0px 0px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.Today-Stock-details-header{
+  color: #55555a;
+  font-size: 18px !important;
+}
+.Today-Stock-details-value{
+  color: #002d62;
+  font-size: 24px;
+  font-weight: bold;
 }

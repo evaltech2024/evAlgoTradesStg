@@ -15,7 +15,7 @@ const Header = () => {
     <IonHeader>
       <IonToolbar>
         <IonButtons slot="secondary">
-          <IonButton routerLink='/profile'>
+          <IonButton href='/profile'>
             <IonIcon slot="icon-only" icon={personCircle}></IonIcon>
           </IonButton>
           <IonButton>

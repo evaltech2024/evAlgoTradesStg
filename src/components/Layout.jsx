@@ -4,9 +4,9 @@ import { IonPage, IonContent } from '@ionic/react';
 import Header from './HeaderPage';
 
 const Layout = ({ children }) => {
-    useEffect(() => {
-        console.log(window.location.pathname);
-    }, [window.location.pathname]);
+    // useEffect(() => {
+    //     console.log(window.location.pathname);
+    // }, [window.location.pathname]);
     // console.log(window.location.pathname);
   return (
     <IonPage>

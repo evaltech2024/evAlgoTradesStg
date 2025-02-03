@@ -10,16 +10,6 @@ import { signInWithGoogle } from './signInWithGoogle';
 // import { auth } from './firebaseConfig';
 
 const LoginPage = () => {
-  const [user] = useAuthState(auth);
-  const history = useHistory();
-
-
-
-  if (user) {
-    history.push('/home');
-    return null;
-  }
-
   return (
     <IonPage>
       <IonContent className="ion-padding">
