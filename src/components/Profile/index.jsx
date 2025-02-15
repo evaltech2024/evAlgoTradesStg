@@ -1,5 +1,5 @@
 // src/pages/ProfilePage.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IonPage,
   IonHeader,
@@ -25,17 +25,33 @@ import {
   cardOutline,
   trashOutline,
   timeOutline,
+  analyticsOutline,
   logOutOutline,
   settingsOutline, logoGoogle
 } from 'ionicons/icons';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useHistory } from 'react-router-dom';
 import { signInWithGoogle } from '../login/signInWithGoogle';
 
-const ProfilePage = () => {
+const ProfilePage = (props) => {
+  const [isShowVerify, setIsShowVerify] = useState(true);
   const history = useHistory();
   const [user, loading] = useAuthState(auth);
+  useEffect(() => {
+    if (loading) return; // Do nothing while loading
+    const fetchUser = async () => {
+      const docRef = doc(db, "customUser", user.uid);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.data().approvalStatus === 1){
+        setIsShowVerify(false);
+      }else{
+        setIsShowVerify(true);
+      }
+    };
+    fetchUser();
+  }, [loading, user]);
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -75,10 +91,14 @@ const ProfilePage = () => {
           </IonItem>
         </IonList> :
           <IonList>
-            <IonItem button detail routerLink="/verify-profile">
+            <IonItem button detail routerLink="/StockPicking">
+              <IonIcon icon={analyticsOutline} slot="start" />
+              <IonLabel>Stock Preferences</IonLabel>
+            </IonItem>
+            {isShowVerify && <IonItem button detail routerLink="/verify-profile">
               <IonIcon icon={timeOutline} slot="start" />
               <IonLabel>Verify Profiles</IonLabel>
-            </IonItem>
+            </IonItem>}
             <IonItem button detail onClick={handleLogout}>
               <IonIcon icon={logOutOutline} slot="start" color="danger" />
               <IonLabel color="danger">Log Out</IonLabel>

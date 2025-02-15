@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
+import moment from 'moment';
 import {
   IonCard,
   IonCardContent,
-  IonIcon,
+  IonIcon,IonBadge,
   IonButton,
   IonText,
   IonChip,
@@ -28,33 +29,48 @@ const StockCard = ({ StockData }) => {
   const [presentAlert] = useIonAlert();
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [actionType, setActionType] = useState("");
-  const currentPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.c;
-  const OpenPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.o;
+  const currentPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar.c || 0;
+  const OpenPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar.o || 0;
   const DailyBarValue=(((currentPrice - OpenPrice)/currentPrice) * 100).toFixed(2);
   const isPositive = DailyBarValue >= 0;
-  const NoOfTrades=StockData.stockHistory.length;
-  const TodayGain = (StockData.stockHistory.reduce((acc, trade) => acc + Number(trade.gain), 0) / NoOfTrades).toFixed(2);
+  const NoOfTrades=StockData?.stockHistory?.length || 0;
+  const TodayGain = (StockData?.stockHistory?.reduce((acc, trade) => acc + Number(trade.gain), 0) / NoOfTrades).toFixed(2);
   
-  const PreCurrentPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].prevDailyBar.c;
-  const PrevOpenPrice=StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].prevDailyBar.o;
+  const PreCurrentPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.prevDailyBar.c || 0;
+  const PrevOpenPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.prevDailyBar.o || 0;
   const PrevDailyBarValue=(((PreCurrentPrice - PrevOpenPrice)/PreCurrentPrice) * 100).toFixed(2);
   const PrevisPositive = PrevDailyBarValue >= 0;
+  const stockDisplayValue = StockData.stockDisplay[0];
   const handleAction = (type) => {
     if (user) {
       // User is logged in, proceed with the action
       const fetchUserData = async () => {
-        const docRef = doc(db, "CustomUser", user.uid);
+        const docRef = doc(db, "customUser", user.uid);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          presentAlert({
-            header: "Action Confirmation",
-            message:
-              "You are already logged in. we are verifying your documents before wait for update.",
-            buttons: [
-              "Cancel",
-              // { text: 'Verify', handler: () => history.push('/profile') },
-            ],
-          });
+          if(docSnap.data().approvalStatus === 0){
+            presentAlert({
+              header: "Action Confirmation",
+              message:
+                "You are already logged in. we are verifying your documents before wait for update.",
+              buttons: [
+                "Cancel",
+                // { text: 'Verify', handler: () => history.push('/profile') },
+              ],
+            });
+          }else{
+            history.push('/userHomePage');
+            // presentAlert({
+            //   header: "Action Confirmation",
+            //   message:
+            //     "You are already logged in. we are verifying your documents before wait for update.",
+            //   buttons: [
+            //     "Cancel",
+            //     // { text: 'Verify', handler: () => history.push('/profile') },
+            //   ],
+            // });
+          };
+          
           return;
         } else {
           presentAlert({
@@ -90,19 +106,30 @@ const StockCard = ({ StockData }) => {
       setShowActionSheet(false);
     });
   };
+  const handleNavigate = (symbol) => {
+    const dataToPass = { key: symbol };
+    console.log(dataToPass);
+    history.push({
+      pathname: '/TradeHistory',
+      state: dataToPass,
+    });
+  };
 
   return (
     <IonCard className="stock-card">
       <IonCardContent>
         <div className="evaigo-overall">
-          <IonText color="dark">
-              <h4 style={{ fontSize: '16px', fontWeight: '700' }}>{StockData.activeTrade.symbol}</h4>
+          <IonText color="dark" className="stock-title">
+              <h4 style={{ fontSize: '16px', fontWeight: '700' }}>{stockDisplayValue.symbol}</h4><IonBadge  color={stockDisplayValue.tradeType==='PAPER'?'tertiary':(stockDisplayValue.tradeType==='LIVE'?'success':'warning')} className='livebutton'>{stockDisplayValue?.tradeType?.charAt(0)}</IonBadge>
               </IonText>
-          <IonIcon icon={statsChartOutline} color="success" />
+              {/* <IonButton className='Secondary-Default_button' size="small" onClick={handleNavigate(stockDisplayValue.symbol)}> */}
+                <IonIcon icon={statsChartOutline} color="success" onClick={() => handleNavigate(stockDisplayValue.symbol)}/>
+                {/* </IonButton> */}
+          
         </div>
         <div className="stock-details">
           <IonText color="dark" style={{ fontSize: '14px', fontWeight: '700', color: '#002d62' }}>
-            $ {StockData.stockSnapshot.snapshot[StockData.stockSnapshot.symbol].minuteBar.c}
+            $ {StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar?.c || 0}
           </IonText>
           <IonChip color={isPositive ? "primary" : "danger"} className="stock-details" style={{ fontSize: '12px' }}>
             <IonIcon icon={isPositive ? trendingUp : trendingDown} />
@@ -110,17 +137,18 @@ const StockCard = ({ StockData }) => {
           </IonChip>
         </div>
         <div className="stock-info">
-          <IonProgressBar style={{ 'marginRight': '10px' }} value={StockData.activeTrade.strength / 100} color="primary" ></IonProgressBar>
-          <div color="dark" className="stock-details">
-            <IonText className="stock-details-header"># of Trades:</IonText>
-            <IonText className="stock-details-value">{NoOfTrades}</IonText>
+          <IonProgressBar style={{ 'marginRight': '10px' }} value={stockDisplayValue.strength / 100} color="primary" ></IonProgressBar>
+          <div className="stock-info-details">
+            <div color="dark" className="stock-details">
+              <IonText className="stock-details-header"># of Trades:</IonText>
+              <IonText className="stock-details-value">{NoOfTrades}</IonText>
+            </div>
+            <div className="stock-details">
+              <IonText className="stock-details-header">Gain:</IonText>
+              <IonText className="stock-details-value">{TodayGain === 'NaN'?0:TodayGain } %</IonText>
+            </div>
           </div>
-          <div className="stock-details">
-            <IonText className="stock-details-header">Gain:</IonText>
-            <IonText className="stock-details-value">{TodayGain === 'NaN'?0:TodayGain } %</IonText>
-          </div>
-          {console.log(StockData.stockHistory)}
-          <IonText className="stock-details-note">Last <span className="stock-details-note-highlight">{StockData.activeTrade.method}</span> Trade Signal at <span className="stock-details-note-highlight">{StockData.stockHistory[0]?.end}</span> </IonText> 
+          <IonText className="stock-details-note">Last <span className="stock-details-note-highlight">{stockDisplayValue.method}</span> Trade Signal detected at <span className="stock-details-note-highlight">{moment(stockDisplayValue?.detected_atDate)?.format('MMM DD HH:mm')}</span> </IonText> 
         </div>
         <div className="card-footer">
           <div color="medium" className="last-day">
@@ -131,10 +159,10 @@ const StockCard = ({ StockData }) => {
             </IonText>
           </div>
           <div className="stock-actions">
-            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Buy")} size="small" disabled={StockData.activeTrade.method === 'sell'}>
+            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Buy")} size="small" disabled={stockDisplayValue.method === 'sell'}>
               Buy
             </IonButton>
-            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Sell")} size="small" disabled={StockData.activeTrade.method === 'buy'}>
+            <IonButton className='Secondary-Default_button' onClick={() => handleAction("Sell")} size="small" disabled={stockDisplayValue.method === 'buy'}>
               Sell
             </IonButton>
           </div>
@@ -143,7 +171,7 @@ const StockCard = ({ StockData }) => {
         <IonActionSheet
           isOpen={showActionSheet}
           onDidDismiss={() => setShowActionSheet(false)}
-          header={`${actionType.charAt(0).toUpperCase() + actionType.slice(1)} ${StockData.activeTrade.symbol}`}
+          header={`${actionType.charAt(0).toUpperCase() + actionType.slice(1)} ${stockDisplayValue.symbol}`}
           buttons={[
             {
               text: 'Sign in with Google',

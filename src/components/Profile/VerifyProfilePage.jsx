@@ -21,7 +21,7 @@ import { home, person, settings, settingsOutline } from "ionicons/icons";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from "../../firebaseConfig";
 import { db } from "../../firebaseConfig";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, addDoc, collection } from "firebase/firestore";
 import { useHistory } from "react-router-dom";
 // import Profile from "../components/Profile";
 
@@ -38,19 +38,20 @@ const VerifyProfilePage = () => {
   const [toastMessage, setToastMessage] = useState("");
   const history = useHistory();
   useEffect(() => {
+    console.log('user:', user);
     if (!user) {
-      history.push("/login");
+      // history.push("/profile");
     } else {
       // Fetch user data
       const fetchUserData = async () => {
-        const docRef = doc(db, 'CustomUser', user.uid);
+        const docRef = doc(db, 'customUser', user.uid);
         const docSnap = await getDoc(docRef);
         console.log('docSnap:', docSnap.data());
         setEmail(user.email);
         setUserName(user.displayName);
-        setAddress(docSnap.data()?.Address || '');
-        setIdNumber(docSnap.data()?.IDVal || '');
-        setMobileNumber(docSnap.data()?.PhoneNo || '');
+        setAddress(docSnap.data()?.address || '');
+        setIdNumber(docSnap.data()?.validDocID || '');
+        setMobileNumber(docSnap.data()?.mobileNumber || '');
         if (docSnap.exists()) {
           setIsShow(true);
           setToastMessage('Verification request already submitted.');
@@ -84,16 +85,28 @@ const VerifyProfilePage = () => {
     try {
       // const user = auth.currentUser;
       if (!user) throw new Error('No user logged in');
-      await setDoc(doc(db, 'CustomUser', user.uid), {
-        Address : address,
-        Email: email,
-        IDVal:idNumber,
-        PhoneNo:mobileNumber,
-        UserName: userName,
-        UserStatus:0,
-        UserStatusText:'',
-        UserType: "Registered",
-        submittedAt: new Date()
+      await setDoc(doc(db, 'customUser', user.uid), {
+        address : address,
+        approvalStatus:0,
+        approvalStatusText:'',
+        createdDate: new Date(),
+        email: email,
+        goofyName:'',
+        validDocID:idNumber,
+        mobileNumber:mobileNumber,
+        userName: userName,
+        userType: "Registered",
+        submittedDate: new Date()
+      });
+      const userPrefDocRef = collection(db, 'userPref');
+      await addDoc(userPrefDocRef, {
+        aiStocks : 30,
+        initActBalance:100,
+        memeStocks:10,
+        otherStocks: 50,
+        pennyStocks: 10,
+        stockInterests:['AAPL','GOOGL','AMZN','TSLA','MSFT'],
+        userID: user.uid,
       });
       setToastMessage('Details saved successfully!');
       setShowToast(true);

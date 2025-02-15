@@ -8,9 +8,11 @@ import {
   IonTitle,
   IonHeader
 } from '@ionic/react';
-import { personCircle, search } from 'ionicons/icons';
+import { personCircle, home } from 'ionicons/icons';
 
-const Header = () => {
+const Header = (props) => {
+  const { customUser } = props;
+  console.log(customUser);
   return (
     <IonHeader>
       <IonToolbar>
@@ -18,11 +20,13 @@ const Header = () => {
           <IonButton href='/profile'>
             <IonIcon slot="icon-only" icon={personCircle}></IonIcon>
           </IonButton>
-          <IonButton>
-            <IonIcon slot="icon-only" icon={search}></IonIcon>
-          </IonButton>
+          {customUser === 1 &&
+          <IonButton href='/userHomePage'>
+          <IonIcon slot="icon-only" icon={home}></IonIcon>
+        </IonButton>}
         </IonButtons>
-        <IonTitle routerLink="/home" style={{ cursor: 'pointer' }}>EvAllGo</IonTitle>
+        <IonButton fill='clear' routerLink="/home" >EvALGO Trades</IonButton>
+        {/* <IonTitle button routerLink="/home" style={{ cursor: 'pointer' }}>EvALGO Trades</IonTitle> */}
       </IonToolbar>
     </IonHeader>
   );

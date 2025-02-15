@@ -113,8 +113,8 @@
 } */
 
 .Today-Stock-info{
-  display: flex;
-  justify-content: space-between;
+  /* display: flex;
+  justify-content: space-between; */
   background: #cce4ff;
   border-radius: 3px;
   flex-wrap: wrap;

@@ -1,39 +1,13 @@
-.stock-card {
-    margin: 5px;
+/* .stock-card {
+    margin: 16px;
     border: 1px solid #00aec74d;
     border-radius: 4px;
     box-shadow: none;
-  } 
-  /* .stock-icon-container {
-    background-color: #000;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 12px;
-  } */
+  }
   
   .stock-icon {
     color: #fff;
     font-size: 24px;
-  }
-  .stock-info{    
-    display: flex;
-    flex-direction: column;
-    /* justify-content: space-between; */
-    /* align-content: space-around; */
-    flex-wrap: wrap;
-    background: #f2f1f9;
-    border-radius: 5px;
-    padding: 8px;
-  }
-  .stock-info-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
   }
   .stock-details{
     display: flex;
@@ -59,20 +33,6 @@
     font-weight: bold;
     text-transform: capitalize;
   }
-  /* .stock-details {
-    flex-grow: 1;
-  } */
-/*   
-  .stock-details h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: bold;
-  }
-  
-  .stock-details p {
-    margin: 0;
-    font-size: 14px;
-  } */
   
   .stock-price {
     text-align: right;
@@ -120,16 +80,11 @@
     justify-content: space-between;
     font-size: xx-small;
   }
-  .userStockHeader{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
   
-  /* .evaigo-overall p {
+  .evaigo-overall p {
     margin: 0 8px 0 0;
     font-size: 0.9rem;
-  } */
+  }
   
   .evaigo-overall ion-icon {
     font-size: 1.2rem;
@@ -155,8 +110,6 @@
     flex-wrap: nowrap;
     border-radius: 3px;
     gap: 5px;
-    /* background: #f2f1f9; */
-    /* padding: 1px; */
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     -ms-border-radius: 3px;
@@ -193,4 +146,4 @@
   font-size: 8px;
   padding: 2px;
   place-self: baseline;
-}
+} */
