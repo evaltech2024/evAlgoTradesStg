@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "evalgotradeswebstaging",
+    "staging": "evalgotradeswebstaging"
+  },
+  "targets": {},
+  "etags": {}
+}

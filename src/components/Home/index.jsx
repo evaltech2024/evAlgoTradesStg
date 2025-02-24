@@ -13,8 +13,7 @@ import {
   IonButton,
 } from '@ionic/react';
 import { notificationsOutline, chevronForwardOutline, homeOutline, documentTextOutline, swapVerticalOutline, timeOutline, personOutline, calendarOutline } from 'ionicons/icons';
-import { collection, query, getDocs, orderBy, where, Timestamp, limit  } from "firebase/firestore";
-// import { collection, query, where, getDocs,  } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from "../../firebaseConfig";
 import firebase from 'firebase/compat/app';
@@ -30,40 +29,17 @@ const convertTimestampToDate = (timestamp) => {
 
 const Home = () => {
   const [combinedData, setCombinedData] = useState([]);
-  const [totalTrades, setTotalTrades] = useState(0);
-  const [todaygain, setTodayGain] = useState(0);
   const [user] = useAuthState(auth);
+  const totalTrades =0;
+  const todaygain = 0;
   useEffect(() => {
     const fetchData = async () => {
-      // Step 1: Get the most recent date
-    const recentDateQuery = query(
-      collection(db, "userStockHistory"),
-      where("userID", "==", user.uid),
-      orderBy("start", "desc"),
-      limit(1)
-    );
-
-    const recentDateSnapshot = await getDocs(recentDateQuery);
-
-    if (recentDateSnapshot.empty) {
-      console.log("No records found for the user");
-      return { data: [], date: null };
-    }
-
-    const mostRecentDate = recentDateSnapshot.docs[0].data().start.toDate();
-    
-    // Step 2: Get all records for the most recent date
-    const startOfDay = new Date(mostRecentDate.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(mostRecentDate.setHours(23, 59, 59, 999));
-
-    console.log(mostRecentDate, recentDateSnapshot.docs[0].data().start, recentDateSnapshot.docs[0].data(), Timestamp.fromDate(mostRecentDate));
       const activeTradesQuery = query(collection(db, "activeTrades"));
       const stockSnapshotQuery = query(collection(db, "stockSnapshot"));
       const stockHistoryQuery = query(
         collection(db, "userStockHistory"),
-        where("userID", "==", user.uid),
-      where("start", ">=", Timestamp.fromDate(startOfDay)),
-      where("start", "<=", Timestamp.fromDate(endOfDay))
+        where("userID", "==", user.uid)
+        // where("start", ">=", new Date().toISOString())
       );
       const [activeTradesSnapshot, stockSnapshotSnapshot, stockHistorySnapshot] = await Promise.all([
         getDocs(activeTradesQuery),
@@ -86,7 +62,6 @@ const Home = () => {
         startDate: convertTimestampToDate(doc.data().start),
         ...doc.data(),
       }));
-      console.log(stockHistories);
       // console.log(stockHistories, activeTrades, stockSnapshots);
       // // console.log(stockHistories);
       const uniqueSymbols = [...new Set([
@@ -97,9 +72,9 @@ const Home = () => {
       //   today.setHours(0, 0, 0, 0);
       //   return new Date(history.end) >= today;
       // });
-      const todaysGain = (stockHistories.reduce((acc, trade) => acc + Number(trade.gain), 0)/stockHistories.length)*100 || 0;
-      setTodayGain(todaysGain);
-      setTotalTrades(stockHistories.length);
+      // const todaysGain = (todaystocks.reduce((acc, trade) => acc + Number(trade.gain), 0)/todaystocks.length)*100 || 0;
+      // setTodayGain(todaysGain);
+      // setTotalTrades(todaystocks.length);
       // // console.log(todaystocks, todaysGain);
 
       const combined = uniqueSymbols.map((trade) => {
@@ -118,15 +93,6 @@ const Home = () => {
         // if (activeTrade.length > 0) {
         //   stockDisplay.push(activeTrade[0]);
         // }
-        let filteredActiveTrade = [];
-        if (activeTrade.length > 0 && stockHistory.length > 0) {
-          filteredActiveTrade = activeTrade.filter(
-            (trade) => trade.procID === stockHistory[0].procID
-          );
-          // if (filteredActiveTrade.length > 0) {
-          //   stockDisplay.push(filteredActiveTrade[0]);
-          // }
-        }
         if (stockHistory.length > 0) {
           stockDisplay.push(stockHistory[0]);
         }
@@ -134,7 +100,6 @@ const Home = () => {
           activeTrade,
           stockSnapshot,
           stockHistory,
-          filteredActiveTrade,
           stockDisplay: stockDisplay.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)),
         };
         }).sort((a, b) => {
@@ -158,14 +123,14 @@ const Home = () => {
 
             <div className="stock-gains-header">
               <div className="greeting">Hi {user?.displayName || ''},</div>
-              <IonButton className="this-week" routerLink='/UserTradingHistory' fill='clear' color='dark'>
+              <div className="this-week">
                 <IonIcon icon={calendarOutline} className="chevron-down" />
                 <IonIcon icon={chevronForwardOutline} className="chevron-down" />
-              </IonButton>
+              </div>
             </div>
             <div color="dark" className="Today-Stock-details">
               <IonText className="Today-Stock-details-header">Total Amount</IonText>
-              <IonText className="Today-Stock-details-value">${100}</IonText>
+              <IonText className="Today-Stock-details-value">${totalTrades || 100}</IonText>
             </div>
             <div color="dark" className="Today-Stock-details">
               <IonText className="Today-Stock-details-header">Total Trades</IonText>

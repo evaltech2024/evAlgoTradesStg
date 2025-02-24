@@ -137,3 +137,6 @@
   font-size: 24px;
   font-weight: bold;
 }
+.safe-area-top {
+  padding-top: var(--ion-safe-area-top, 20px);
+}

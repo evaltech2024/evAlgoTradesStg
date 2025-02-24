@@ -12,9 +12,8 @@ import { personCircle, home } from 'ionicons/icons';
 
 const Header = (props) => {
   const { customUser } = props;
-  console.log(customUser);
   return (
-    <IonHeader>
+    <IonHeader translucent>
       <IonToolbar>
         <IonButtons slot="secondary">
           <IonButton href='/profile'>

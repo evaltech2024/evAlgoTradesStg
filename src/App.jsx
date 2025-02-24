@@ -32,6 +32,7 @@ import EditProfilePage from './components/Profile/EditProfilePage.jsx';
 import VerifyProfilePage from './components/Profile/VerifyProfilePage.jsx';
 import { db } from "./firebaseConfig";
 import { collection, query, getDoc, orderBy, where, doc } from "firebase/firestore";
+import { StatusBar } from '@capacitor/status-bar';
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -57,7 +58,7 @@ import '@ionic/react/css/display.css';
 
 /* import '@ionic/react/css/palettes/dark.always.css'; */
 /* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
+// import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
 import './theme/variables.css';
@@ -65,9 +66,22 @@ import './theme/variables.css';
 setupIonicReact();
 
 const App = () => {
+//   const { StatusBar } = Plugins;
+
+// // In your component or useEffect
+// StatusBar.setStyle({ style: StatusBarStyle.Light });
+// StatusBar.setBackgroundColor({ color: '#ffffff' });
+
   const [user] = useAuthState(auth);
   const [customUser, setCustomUser] = useState(0);
-
+  useEffect(() => {
+    const setupStatusBar = async () => {
+      await StatusBar.setStyle({ style: 'LIGHT' });
+      await StatusBar.setBackgroundColor({ color: '#000' });
+    };
+    
+    setupStatusBar();
+  }, []);
   useEffect(() => {
     if (user) {
       const fetchCustomUser = async () => {
@@ -81,7 +95,7 @@ const App = () => {
     }
   }, [user]);
   return (
-    <IonApp>
+    <IonApp style={{marginTop: '20px'}}>
       <IonReactRouter>
         <IonRouterOutlet>
           <Route exact path="/home" render={() => <HomePage  customUser={customUser}/>} />

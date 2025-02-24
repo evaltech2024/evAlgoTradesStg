@@ -29,15 +29,15 @@ const StockCard = ({ StockData }) => {
   const [presentAlert] = useIonAlert();
   const [showActionSheet, setShowActionSheet] = useState(false);
   const [actionType, setActionType] = useState("");
-  const currentPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar.c || 0;
-  const OpenPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar.o || 0;
+  const currentPrice=StockData?.stockSnapshot?.minuteBar.c || 0;
+  const OpenPrice=StockData?.stockSnapshot?.minuteBar.o || 0;
   const DailyBarValue=(((currentPrice - OpenPrice)/currentPrice) * 100).toFixed(2);
   const isPositive = DailyBarValue >= 0;
-  const NoOfTrades=StockData?.stockHistory?.length || 0;
+  const NoOfTrades=StockData?.activeTrade?.length || 0;
   const TodayGain = (StockData?.stockHistory?.reduce((acc, trade) => acc + Number(trade.gain), 0) / NoOfTrades).toFixed(2);
   
-  const PreCurrentPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.prevDailyBar.c || 0;
-  const PrevOpenPrice=StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.prevDailyBar.o || 0;
+  const PreCurrentPrice=StockData?.stockSnapshot?.prevDailyBar.c || 0;
+  const PrevOpenPrice=StockData?.stockSnapshot?.prevDailyBar.o || 0;
   const PrevDailyBarValue=(((PreCurrentPrice - PrevOpenPrice)/PreCurrentPrice) * 100).toFixed(2);
   const PrevisPositive = PrevDailyBarValue >= 0;
   const stockDisplayValue = StockData.stockDisplay[0];
@@ -129,33 +129,34 @@ const StockCard = ({ StockData }) => {
         </div>
         <div className="stock-details">
           <IonText color="dark" style={{ fontSize: '14px', fontWeight: '700', color: '#002d62' }}>
-            $ {StockData?.stockSnapshot?.snapshot?.[StockData.stockSnapshot.symbol]?.minuteBar?.c || 0}
+            $ {StockData?.stockSnapshot?.minuteBar?.c || 0}
           </IonText>
           <IonChip color={isPositive ? "primary" : "danger"} className="stock-details" style={{ fontSize: '12px' }}>
             <IonIcon icon={isPositive ? trendingUp : trendingDown} />
-            {DailyBarValue} %
+            {isNaN(DailyBarValue)?0:DailyBarValue} %
           </IonChip>
         </div>
         <div className="stock-info">
           <IonProgressBar style={{ 'marginRight': '10px' }} value={stockDisplayValue.strength / 100} color="primary" ></IonProgressBar>
           <div className="stock-info-details">
+          <IonText className="stock-details-note">Last <span className="stock-details-note-highlight">{stockDisplayValue.method}</span> Trade Signal detected at <span className="stock-details-note-highlight">{moment(stockDisplayValue?.detected_atDate)?.format('MMM DD HH:mm')}</span> </IonText> 
+
             <div color="dark" className="stock-details">
               <IonText className="stock-details-header"># of Trades:</IonText>
               <IonText className="stock-details-value">{NoOfTrades}</IonText>
             </div>
-            <div className="stock-details">
+            {/* <div className="stock-details">
               <IonText className="stock-details-header">Gain:</IonText>
               <IonText className="stock-details-value">{TodayGain === 'NaN'?0:TodayGain } %</IonText>
-            </div>
+            </div> */}
           </div>
-          <IonText className="stock-details-note">Last <span className="stock-details-note-highlight">{stockDisplayValue.method}</span> Trade Signal detected at <span className="stock-details-note-highlight">{moment(stockDisplayValue?.detected_atDate)?.format('MMM DD HH:mm')}</span> </IonText> 
         </div>
         <div className="card-footer">
           <div color="medium" className="last-day">
             <IonText style={{ fontSize: '8px' }}>Last Day</IonText>
             <IonText color={PrevisPositive ? "primary" : "danger"} className="last-day-value">
               <IonIcon icon={PrevisPositive ? trendingUp : trendingDown} />
-              {` ${PrevDailyBarValue} %`}
+              {` ${isNaN(PrevDailyBarValue)?0:PrevDailyBarValue} %`}
             </IonText>
           </div>
           <div className="stock-actions">
