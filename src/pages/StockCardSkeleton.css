@@ -1,0 +1,111 @@
+.stock-skeleton-container {
+    padding: 10px;
+  }
+  
+  .stock-card {
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .stock-header {
+    margin-bottom: 8px;
+  }
+  
+  .stock-symbol {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .symbol-badge-container {
+    display: flex;
+    align-items: center;
+  }
+  
+  .m-badge {
+    background: #ffc107;
+    color: #333;
+    margin-left: 5px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+  
+  .chart-icon {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .stock-price {
+    font-size: 22px;
+    font-weight: bold;
+  }
+  
+  .price-change {
+    background-color: #fee9e9;
+    color: #d32f2f;
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    font-weight: 500;
+  }
+  
+  .price-change.small {
+    font-size: 14px;
+    padding: 2px 8px;
+  }
+  
+  .trade-signal-container {
+    background-color: rgba(240, 242, 255, 0.8);
+    padding: 12px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  
+  .trade-progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    --background: rgba(63, 81, 181, 0.2);
+    --progress-background: #3f51b5;
+  }
+  
+  .last-day-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  
+  .last-day-label {
+    margin-bottom: 4px;
+    color: #666;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .buy-button {
+    --border-radius: 20px;
+    --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    margin-right: 8px;
+    font-weight: bold;
+  }
+  
+  .sell-button {
+    --border-radius: 20px;
+    --background: #ffffff;
+    --color: #666;
+    font-weight: bold;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  

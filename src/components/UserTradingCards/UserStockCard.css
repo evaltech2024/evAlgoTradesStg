@@ -1,0 +1,149 @@
+/* .stock-card {
+    margin: 16px;
+    border: 1px solid #00aec74d;
+    border-radius: 4px;
+    box-shadow: none;
+  }
+  
+  .stock-icon {
+    color: #fff;
+    font-size: 24px;
+  }
+  .stock-details{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 12px;
+    padding: 0px 5px 0px 0px;
+  }
+  .stock-details-header{
+    color: #55555a;
+    font-size: 10px !important;
+  }
+  .stock-details-value{
+    color: #002d62;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .stock-details-note{
+    font-size: 8px;
+  }
+  .stock-details-note-highlight{
+    color: #002D62;
+    font-weight: bold;
+    text-transform: capitalize;
+  }
+  
+  .stock-price {
+    text-align: right;
+  }
+  
+  .stock-price h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .stock-price p {
+    margin: 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  
+  .stock-price ion-icon {
+    margin-right: 4px;
+  }
+  
+  .stock-actions {
+    display: flex;
+    justify-content:  flex-end;
+  }
+  
+  .buy-button, .sell-button {
+    flex: 1;
+    margin: 0 4px;
+  }
+  
+  .buy-button {
+    --background: #3475F1;
+  }
+  
+  .sell-button {
+    --background: #80ed99;
+  }
+  
+  .evaigo-overall {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: xx-small;
+  }
+  
+  .evaigo-overall p {
+    margin: 0 8px 0 0;
+    font-size: 0.9rem;
+  }
+  
+  .evaigo-overall ion-icon {
+    font-size: 1.2rem;
+    background-color: #f1f1f1;
+    border-radius: 4px;
+    padding: 2px;
+  }
+  .card-footer{
+    display: flex;
+    justify-content: space-between;
+  }
+  .last-day {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .last-day-value{
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border-radius: 3px;
+    gap: 5px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+}
+
+.Secondary-Default_button {
+  box-shadow: none !important;
+  font-weight: 700 !important;
+  line-height: 16.1px;
+  text-align: center !important;
+  --background: #E0EFFF !important;
+  --border: 1px solid #002D62 !important;
+  --color: #002D62 !important;
+}
+.Secondary-Default_button:hover {
+  --background: #CCE4FF !important;
+}
+.Secondary-Default_button:active {
+  --background: #ADCCF0 !important;
+}
+
+.Secondary-Default_button.button-disabled {
+  --background: #E0DDEE !important;
+  --box-shadow: none !important;
+  --color: #B8B8CB !important;
+}
+.stock-title{
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.livebutton{
+  font-size: 8px;
+  padding: 2px;
+  place-self: baseline;
+} */

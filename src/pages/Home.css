@@ -1,0 +1,142 @@
+/* .app-container {
+    padding: 20px;
+    background-color: #f4f4f4;
+    height: 100%;
+  }
+  
+  .header {
+    background-color: #00ff9d;
+    border-radius: 20px;
+    padding: 20px;
+    color: white;
+    position: relative;
+  }
+  
+  .notification-icon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    padding: 10px;
+  }
+  
+  .balance-section {
+    margin-top: 20px;
+  }
+  
+  .percentage-change {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+  }
+  
+  .percentage-change.positive {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .action-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .portfolio-section {
+    background-color: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .portfolio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .coin-list {
+    margin-top: 20px;
+  }
+  
+  .coin-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .coin-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
+  
+  .coin-details {
+    flex-grow: 1;
+  }
+  
+  .coin-value {
+    text-align: right;
+  }
+  
+  .bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    background-color: white;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .balance-info {
+    display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        align-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+  } */
+  /* .balance-card {
+    background-color: #1e2f97;
+    color: #f0f0f0 !important;
+    border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+} */
+
+.Today-Stock-info{
+  /* display: flex;
+  justify-content: space-between; */
+  background: #cce4ff;
+  border-radius: 3px;
+  flex-wrap: wrap;
+  padding: 8px;
+}
+.Today-Stock-details{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0px 5px 0px 0px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.Today-Stock-details-header{
+  color: #55555a;
+  font-size: 18px !important;
+}
+.Today-Stock-details-value{
+  color: #002d62;
+  font-size: 24px;
+  font-weight: bold;
+}
+.safe-area-top {
+  padding-top: var(--ion-safe-area-top, 20px);
+}
