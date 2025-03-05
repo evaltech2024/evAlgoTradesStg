@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     FirebaseAuthentication: {
       skipNativeAuth: false,
       providers: ["google.com"]
-    }
+    },
   }
   // platforms: ['android', 'ios'] // Add this line
 };

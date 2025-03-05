@@ -30,35 +30,75 @@ import {
   settingsOutline, logoGoogle
 } from 'ionicons/icons';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { auth, db } from '../../firebaseConfig';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useHistory } from 'react-router-dom';
-import { signInWithGoogle } from '../login/signInWithGoogle';
+import { signInWithGoogle } from '../login/signInWithGoogle'; 
+import Loader from '../../pages/Loader';
+import { getStoredApprovalStatus, setStoredApprovalStatus } from '../../utils/preferences';
+import { clearAuthData, checkAuthState } from '../../utils/storage';
 
 const ProfilePage = (props) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [isShowVerify, setIsShowVerify] = useState(true);
   const history = useHistory();
-  const [user, loading] = useAuthState(auth);
   useEffect(() => {
-    if (loading) return; // Do nothing while loading
     const fetchUser = async () => {
-      const docRef = doc(db, "customUser", user.uid);
-      const docSnap = await getDoc(docRef);
-      if(docSnap.data().approvalStatus === 1){
-        setIsShowVerify(false);
-      }else{
-        setIsShowVerify(true);
-      }
+      const [userInfo] = await Promise.all([
+        checkAuthState()
+      ]);
+      setUser(userInfo);
+      setLoading(false);
     };
     fetchUser();
-  }, [loading, user]);
+  }, []);
+    useEffect(() => {
+      if (!user) return;
+      const fetchCustomUser = async () => {
+        try {
+          // Check stored preferences first
+          const storedStatus = await getStoredApprovalStatus();
+          if (storedStatus !== null) {
+            if(storedStatus === 1){
+              setIsShowVerify(false);
+            }else{
+              setIsShowVerify(true);
+            }
+            return;
+          };
+        } catch (error) {
+          console.error('Error fetching user status:', error);
+        }
+      };
+  
+      fetchCustomUser();
+    }, [user]);
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
   const handleLogout = async () => {
-    await auth.signOut().then(() => {
+    try {
+      if (Capacitor.isNativePlatform()) {
+        // Sign out from Firebase Authentication on mobile
+        await FirebaseAuthentication.signOut();
+      } else {
+        // Sign out from web Firebase
+        await auth.signOut();
+      }
+      
+      // Clear stored user data
+      await clearAuthData();
       history.push('/home');
-    });
+      return true;
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+    // await auth.signOut().then(() => {
+    //   history.push('/home');
+    // });
   };
   return (
     <IonPage>

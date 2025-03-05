@@ -19,120 +19,95 @@ import {
   IonSpinner,
   IonToolbar,
 } from "@ionic/react";
-import { collection, query, getDocs, orderBy, where, Timestamp  } from "firebase/firestore";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { db } from "../firebaseConfig";import moment from 'moment';
+// Import preference functions
+import { getAndStoreActiveTrades, getAndStoreStockSnapshots, isCacheStale } from "../utils/preferences";
+import { db } from "../firebaseConfig";
+import moment from 'moment';
 import { pin, share, trash } from "ionicons/icons";
 import "./Home.css";
 import Header from "../components/HeaderPage";
 import StockCard from "../components/TradingCards";
 import NewHome from "../components/Home";
+import Loader from "./Loader";
+
 const convertTimestampToDate = (timestamp) => {
   if (!timestamp) return '';
   const date = timestamp.seconds? timestamp.toDate() : timestamp;
   return new Date(date);
 };
+
 const Home = (props) => {
-  // const [customUser] = props;
   const [combinedData, setCombinedData] = useState([]);
   const [totalTrades, setTotalTrades] = useState(0);
   const [todaygain, setTodayGain] = useState(0);
-  // const [value, loading, error] = useCollection(collection(db, "activeTrades")); // Now it's safe to access value.docs 
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     const fetchData = async () => {
-      const activeTradesQuery = query(collection(db, "activeTrades"));
-      const stockSnapshotQuery = query(collection(db, "stockSnapshot"), where("symbol", "==", "ALL"));
-      // const stockHistoryQuery = query(collection(db, "stockHistory"), orderBy("end", "desc"));
-      const fiveDaysAgo = new Date();
-      fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 1);
-    const threeDaysAgoTimestamp = Timestamp.fromDate(fiveDaysAgo);
-
-      // const stockHistoryQuery = query(
-      //   collection(db, "stockHistory"),
-      //   where("start", ">=", threeDaysAgoTimestamp)
-      // );
-      const [activeTradesSnapshot, stockSnapshotSnapshot] = await Promise.all([
-        getDocs(activeTradesQuery),
-        getDocs(stockSnapshotQuery),
-        // getDocs(stockHistoryQuery),
-      ]);
-
-      const activeTrades = activeTradesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        detected_atDate: convertTimestampToDate(doc.data().start),
-        ...doc.data(),
-      }));
-      const stockSnapshots = stockSnapshotSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      // const stockHistories = stockHistorySnapshot.docs.map((doc) => ({
-      //   id: doc.id,
-      //   startDate: convertTimestampToDate(doc.data().start),
-      //   endDate: convertTimestampToDate(doc.data().end),
-      //   detected_atDate: convertTimestampToDate(doc.data().end),
-      //   ...doc.data(),
-      // }));
-      console.log(stockSnapshots, '---------->ActiveTrades');
-      // console.log(stockHistories,'---------->StockHostory');
-      const uniqueSymbols = [...new Set([
-        ...activeTrades.map((trade) => trade.symbol),
-        // ...stockHistories.map((history) => history.symbol)
-      ])];
-      // const todaystocks = activeTrades.filter((history) => {
-      //   const today = new Date(stockHistories[0].end);
-      //   today.setHours(0, 0, 0, 0);
-      //   return new Date(history.end) >= today;
-      // });
-      // const todaysGain = (activeTrades.reduce((acc, trade) => acc + Number(trade.gain), 0)/todaystocks.length)*100 || 0;
-      // setTodayGain(todaysGain);
-      setTotalTrades(activeTrades.length);
-      // console.log(todaystocks, todaysGain);
-
-      const combined = uniqueSymbols.map((trade) => {
-        const activeTrade = activeTrades
-          .filter((activeTrade) => activeTrade.symbol === trade)
-          .sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate));
-
-        const stockSnapshot = stockSnapshots[0].snapshot[trade];
-        // .find(
-          // (snapshot) => snapshot.symbol === trade
-        // );
-
-        // const stockHistory = stockHistories
-        //   .filter((history) => history.symbol === trade)
-        //   .sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate)); // Get the most recent stockHistory or an empty object
-        const stockDisplay = [];
-        if (activeTrade.length > 0) {
-          stockDisplay.push(activeTrade[0]);
+      try {
+        setLoading(true);
+        
+        // Check if cache is stale
+        // const isActiveTradesStale = await isCacheStale('activeTrades', 5); // 5 minutes
+        // const isStockSnapshotsStale = await isCacheStale('stockSnapshots', 5);
+        
+        
+        // Fetch data (will use cache if available and not stale)
+        const [activeTrades, stockSnapshots] = await Promise.all([
+          getAndStoreActiveTrades(),
+          getAndStoreStockSnapshots()
+        ]);
+        
+        // Process the data
+        if (!activeTrades || !stockSnapshots) {
+          console.error('Failed to fetch required data');
+          setLoading(false);
+          return;
         }
-        // if (stockHistory.length > 0) {
-        //   stockDisplay.push(stockHistory[0]);
-        // }
-        return {
-          activeTrade,
-          stockSnapshot,
-          // stockHistory,
-          stockDisplay: stockDisplay.sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate)),
-        };
-      }).sort((a, b) => {
-        if (!a.stockDisplay[0].detected_atDate) return 1; // If a has no stockHistory, place it after b
-        if (!b.stockDisplay[0].detected_atDate) return -1; // If b has no stockHistory, place it after a
-        return new Date(b.stockDisplay[0].detected_atDate) - new Date(a.stockDisplay[0].detected_atDate); // Order by the most recent stockHistory end date
-      });
-      console.log(combined, activeTrades);
-      setCombinedData(combined);
+        
+        const processedActiveTrades = activeTrades.map(trade => ({
+          ...trade,
+          detected_atDate: trade.start instanceof Date ? trade.start : convertTimestampToDate(trade.start)
+        }));
+        
+        // Rest of processing logic
+        const uniqueSymbols = [...new Set(processedActiveTrades.map((trade) => trade.symbol))];
+        setTotalTrades(processedActiveTrades.length);
+        
+        const combined = uniqueSymbols.map((symbol) => {
+          const activeTrade = processedActiveTrades
+            .filter((trade) => trade.symbol === symbol)
+            .sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate));
+            
+          const stockSnapshot = stockSnapshots.snapshot[symbol];
+          
+          const stockDisplay = [];
+          if (activeTrade.length > 0) {
+            stockDisplay.push(activeTrade[0]);
+          }
+          
+          return {
+            activeTrade,
+            stockSnapshot,
+            stockDisplay: stockDisplay.sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate)),
+          };
+        }).sort((a, b) => {
+          if (!a.stockDisplay[0]?.detected_atDate) return 1;
+          if (!b.stockDisplay[0]?.detected_atDate) return -1;
+          return new Date(b.stockDisplay[0].detected_atDate) - new Date(a.stockDisplay[0].detected_atDate);
+        });
+        
+        console.log('Combined data:', combined);
+        setCombinedData(combined);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, []);
-  // if (error) {
-  //   return <strong>Error: {JSON.stringify(error)}</strong>;
-  // }
-
-  // if (loading) {
-  //   return <IonSpinner />;
-  // }
 
   return (
     <IonPage >
@@ -144,14 +119,12 @@ const Home = (props) => {
               <IonText className="Today-Stock-details-header">Live Trades</IonText>
               <IonText className="Today-Stock-details-value">{totalTrades}</IonText>
             </div>
-            {/* <div className="Today-Stock-details">
-              <IonText className="Today-Stock-details-header">Gain</IonText>
-              <IonText className="Today-Stock-details-value">{todaygain.toFixed(2)} %</IonText>
-            </div> */}
           </IonCardContent>
         </IonCard>
         <div>
-          {combinedData && combinedData.length > 0 ? (
+          {loading ? (
+            <Loader />
+          ) : combinedData && combinedData.length > 0 ? (
             combinedData.map((doc, i) => (
               <div key={i}>
                 <StockCard StockData={doc} />

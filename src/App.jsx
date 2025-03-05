@@ -19,6 +19,8 @@ import { home, person, settings,  ellipsisHorizontal, ellipsisVertical, personCi
 import { onAuthStateChanged } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebaseConfig';
+// Add import for Preferences
+import { Preferences } from '@capacitor/preferences';
 import HomePage from './pages/HomePage.jsx';
 import UserHomePage from './components/Home';
 import LoginPage from './pages/LoginPage.jsx';
@@ -33,6 +35,9 @@ import VerifyProfilePage from './components/Profile/VerifyProfilePage.jsx';
 import { db } from "./firebaseConfig";
 import { collection, query, getDoc, orderBy, where, doc } from "firebase/firestore";
 import { StatusBar } from '@capacitor/status-bar';
+import Loader from './pages/Loader';
+import { checkAuthState } from './utils/storage';
+import { getStoredApprovalStatus, setStoredApprovalStatus, getAndStoreCustomUser } from './utils/preferences';
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
 
@@ -66,34 +71,62 @@ import './theme/variables.css';
 setupIonicReact();
 
 const App = () => {
-//   const { StatusBar } = Plugins;
-
-// // In your component or useEffect
-// StatusBar.setStyle({ style: StatusBarStyle.Light });
-// StatusBar.setBackgroundColor({ color: '#ffffff' });
-
-  const [user] = useAuthState(auth);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [customUser, setCustomUser] = useState(0);
+
   useEffect(() => {
-    const setupStatusBar = async () => {
-      await StatusBar.setStyle({ style: 'LIGHT' });
-      await StatusBar.setBackgroundColor({ color: '#000' });
+    // Combine status bar setup with auth check
+    const initialize = async () => {
+      try {
+        // Run status bar and auth checks in parallel
+        const [userInfo] = await Promise.all([
+          checkAuthState(),
+          // StatusBar.setStyle({ style: '#ffffff' }),
+          // StatusBar.setBackgroundColor({ color: '#000000' })
+        ]);
+        setUser(userInfo);
+      } catch (error) {
+        console.error('Initialization error:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    setupStatusBar();
+
+    initialize();
   }, []);
+
   useEffect(() => {
-    if (user) {
-      const fetchCustomUser = async () => {
-        const userDocRef = doc(collection(db, 'customUser'), user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists) {
-          setCustomUser(userDoc.data().approvalStatus);
+    if (!user) return;
+
+    const fetchCustomUser = async () => {
+      try {
+        // Check stored preferences first
+        const storedStatus = await getStoredApprovalStatus();
+        console.log('Stored status:', storedStatus);
+        
+        if (storedStatus !== null) {
+          setCustomUser(storedStatus);
+          return;
         }
-      };
-      fetchCustomUser();
-    }
+
+        // Fallback to Firebase if no stored status
+        const userData =  await getAndStoreCustomUser();
+        if(userData){
+          setCustomUser(userData.approvalStatus);
+          await setStoredApprovalStatus(userData.approvalStatus);
+        } 
+      } catch (error) {
+        console.error('Error fetching user status:', error);
+      }
+    };
+
+    fetchCustomUser();
   }, [user]);
+  if (loading) {
+    return <Loader />;
+  }
+
   return (
     <IonApp style={{marginTop: '20px'}}>
       <IonReactRouter>

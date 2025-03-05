@@ -19,6 +19,8 @@ import { auth, db } from "../../firebaseConfig";
 import firebase from 'firebase/compat/app';
 import UserStockCard from "../UserTradingCards";
 import Header from "../HeaderPage";
+import Loader from "../../pages/Loader";
+import { getStoredUserActiveTrades, getStoredStockSnapshots, getAndStoreUserStats  } from "../../utils/preferences";
 import './Home.css';
 
 const convertTimestampToDate = (timestamp) => {
@@ -30,76 +32,74 @@ const convertTimestampToDate = (timestamp) => {
 const Home = () => {
   const [combinedData, setCombinedData] = useState([]);
   const [user] = useAuthState(auth);
-  const totalTrades =0;
+  const [totalTrades, setTotalTrades] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+    const [loading, setLoading] = useState(true);
+  // const totalTrades =0;
   const todaygain = 0;
   useEffect(() => {
     const fetchData = async () => {
-      const activeTradesQuery = query(collection(db, "activeTrades"));
-      const stockSnapshotQuery = query(collection(db, "stockSnapshot"));
-      const stockHistoryQuery = query(
-        collection(db, "userStockHistory"),
-        where("userID", "==", user.uid)
-        // where("start", ">=", new Date().toISOString())
-      );
-      const [activeTradesSnapshot, stockSnapshotSnapshot, stockHistorySnapshot] = await Promise.all([
-        getDocs(activeTradesQuery),
-        getDocs(stockSnapshotQuery),
-        getDocs(stockHistoryQuery),
+      try {
+        setLoading(true);
+      // const activeTradesQuery = await getStoredUserActiveTrades();
+      // console.log(activeTradesQuery);
+      // const stockSnapshotQuery = await getStoredStockSnapshots();
+      // const stockHistoryQuery = query(
+      //   collection(db, "userStockHistory"),
+      //   where("userID", "==", user.uid)
+      //   // where("start", ">=", new Date().toISOString())
+      // );
+      const [activeTradesSnapshot, stockSnapshotSnapshot, userStatus] = await Promise.all([
+        getStoredUserActiveTrades(),
+        getStoredStockSnapshots(),
+        getAndStoreUserStats(),
       ]);
 
-      const activeTrades = activeTradesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        startDate: convertTimestampToDate(doc.data().start),
-        detected_atDate: convertTimestampToDate(doc?.data()?.detected_at),
-        ...doc.data(),
-      }));
-      const stockSnapshots = stockSnapshotSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const stockHistories = stockHistorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        startDate: convertTimestampToDate(doc.data().start),
-        ...doc.data(),
-      }));
-      // console.log(stockHistories, activeTrades, stockSnapshots);
-      // // console.log(stockHistories);
+      const activeTrades = activeTradesSnapshot;
+      const stockSnapshots = stockSnapshotSnapshot;
+      console.log(activeTrades, userStatus);
+      // const stockHistories = stockHistorySnapshot.docs.map((doc) => ({
+      //   id: doc.id,
+      //   startDate: convertTimestampToDate(doc.data().start),
+      //   ...doc.data(),
+      // }));
+      // // console.log(stockHistories, activeTrades, stockSnapshots);
+      // // // console.log(stockHistories);
       const uniqueSymbols = [...new Set([
-        ...stockHistories.map((history) => history.symbol)
+        ...activeTradesSnapshot.map((history) => history.symbol)
       ])];
-      // const todaystocks = stockHistories.filter((history) => {
-      //   const today = new Date(stockHistories[0].end);
-      //   today.setHours(0, 0, 0, 0);
-      //   return new Date(history.end) >= today;
-      // });
-      // const todaysGain = (todaystocks.reduce((acc, trade) => acc + Number(trade.gain), 0)/todaystocks.length)*100 || 0;
-      // setTodayGain(todaysGain);
-      // setTotalTrades(todaystocks.length);
-      // // console.log(todaystocks, todaysGain);
+      // // const todaystocks = stockHistories.filter((history) => {
+      // //   const today = new Date(stockHistories[0].end);
+      // //   today.setHours(0, 0, 0, 0);
+      // //   return new Date(history.end) >= today;
+      // // });
+      // // const todaysGain = (todaystocks.reduce((acc, trade) => acc + Number(trade.gain), 0)/todaystocks.length)*100 || 0;
+      // // setTodayGain(todaysGain);
+      setTotalAmount(userStatus[0].actBalance.toFixed(2));
+      setTotalTrades(activeTrades.length);
+      // // // console.log(todaystocks, todaysGain);
 
       const combined = uniqueSymbols.map((trade) => {
         const activeTrade = activeTrades
           .filter((activeTrade) => activeTrade.symbol === trade)
           .sort((a, b) => new Date(b.detected_atDate) - new Date(a.detected_atDate));
 
-        const stockSnapshot = stockSnapshots.find(
-          (snapshot) => snapshot.symbol === trade
-        );
+        const stockSnapshot = stockSnapshots.snapshot[trade];
 
-        const stockHistory = stockHistories
-          .filter((history) => history.symbol === trade)
-          .sort((a, b) => new Date(b.startDate) - new Date(a.startDate)); // Get the most recent stockHistory or an empty object
+        // const stockHistory = stockHistories
+        //   .filter((history) => history.symbol === trade)
+        //   .sort((a, b) => new Date(b.startDate) - new Date(a.startDate)); // Get the most recent stockHistory or an empty object
         const stockDisplay = [];
-        // if (activeTrade.length > 0) {
-        //   stockDisplay.push(activeTrade[0]);
-        // }
-        if (stockHistory.length > 0) {
-          stockDisplay.push(stockHistory[0]);
+        if (activeTrade.length > 0) {
+          stockDisplay.push(activeTrade[0]);
         }
+        // if (stockHistory.length > 0) {
+        //   stockDisplay.push(stockHistory[0]);
+        // }
         return {
           activeTrade,
           stockSnapshot,
-          stockHistory,
+          // stockHistory,
           stockDisplay: stockDisplay.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)),
         };
         }).sort((a, b) => {
@@ -109,6 +109,11 @@ const Home = () => {
       });
       console.log(combined, activeTrades);
       setCombinedData(combined);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
     };
 
     fetchData();
@@ -130,25 +135,27 @@ const Home = () => {
             </div>
             <div color="dark" className="Today-Stock-details">
               <IonText className="Today-Stock-details-header">Total Amount</IonText>
-              <IonText className="Today-Stock-details-value">${totalTrades || 100}</IonText>
+              <IonText className="Today-Stock-details-value">${totalAmount || 100}</IonText>
             </div>
             <div color="dark" className="Today-Stock-details">
-              <IonText className="Today-Stock-details-header">Total Trades</IonText>
+              <IonText className="Today-Stock-details-header">Live Trades</IonText>
               <IonText className="Today-Stock-details-value">{totalTrades || 0}</IonText>
             </div>
-            <div className="Today-Stock-details">
+            {/* <div className="Today-Stock-details">
               <IonText className="Today-Stock-details-header">Gain</IonText>
               <IonText className="Today-Stock-details-value">{todaygain?.toFixed(2) || 0.00} %</IonText>
-            </div>
+            </div> */}
           </IonCardContent>
         </IonCard>
 
         <div className="section-header">
-          <h2>My Trades</h2>
+          <h2>Live Trades</h2>
           {/* <IonIcon icon={chevronForwardOutline} /> */}
         </div>
         <div style={{ overflow: 'auto' }}>
-          {combinedData && combinedData.length > 0 ? (
+        {loading ? (
+            <Loader />
+          ) : combinedData && combinedData.length > 0 ? (
             combinedData.map((doc, i) => (
               <div key={i}>
                 {/* Access document data here */}
